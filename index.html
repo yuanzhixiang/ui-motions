@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Motions</title>
+<meta name="description" content="我收集与复刻的 UI 组件动效，每个动效都是一个自包含的 HTML 页面。">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --card: #16191f;
+    --card-hover: #1c2027;
+    --border: rgba(255, 255, 255, 0.08);
+    --fg: #e8eaed;
+    --muted: #9aa1ab;
+    --accent: #7aa2ff;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    padding: 64px 24px;
+  }
+  main { max-width: 960px; margin: 0 auto; }
+  header.page { margin-bottom: 40px; }
+  header.page h1 { font-size: 28px; letter-spacing: 0.02em; }
+  header.page p { color: var(--muted); margin-top: 8px; font-size: 14px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .card:hover { background: var(--card-hover); transform: translateY(-2px); }
+  .card-link { text-decoration: none; color: inherit; flex: 1; }
+  .card h2 { font-size: 16px; font-weight: 600; }
+  .desc { color: var(--muted); font-size: 13px; line-height: 1.6; margin-top: 8px; }
+  .card footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .source { color: var(--accent); text-decoration: none; }
+  .source:hover { text-decoration: underline; }
+  .empty { color: var(--muted); }
+</style>
+</head>
+<body>
+  <main>
+    <header class="page">
+      <h1>UI Motions</h1>
+      <p>收集与复刻的组件动效 · 共 1 个 · <a class="source" href="https://github.com/yuanzhixiang/ui-motions">GitHub ↗</a></p>
+    </header>
+    <div class="grid">
+      <article class="card">
+        <a class="card-link" href="magnetic-button.html">
+          <h2>磁吸按钮 Magnetic Button</h2>
+          <p class="desc">hover 时按钮和文字分层跟随光标产生磁吸位移，离开后弹回原位；基于 requestAnimationFrame + lerp 缓动实现。</p>
+        </a>
+        <footer>
+          <time>2026-07-18</time>
+          
+        </footer>
+      </article>
+    </div>
+  </main>
+</body>
+</html>

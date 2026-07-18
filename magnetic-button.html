@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>磁吸按钮 Magnetic Button</title>
+<meta name="description" content="hover 时按钮和文字分层跟随光标产生磁吸位移，离开后弹回原位；基于 requestAnimationFrame + lerp 缓动实现。">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #0d0f12;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  }
+  .magnetic {
+    position: relative;
+    padding: 18px 44px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    background: transparent;
+    color: #e8eaed;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    will-change: transform;
+  }
+  .magnetic:hover { border-color: rgba(255, 255, 255, 0.4); }
+  /* 文字单独一层，用更大的位移系数，形成视差 */
+  .magnetic span { display: inline-block; will-change: transform; }
+</style>
+</head>
+<body>
+  <button class="magnetic"><span>Hover me</span></button>
+  <script>
+    const btn = document.querySelector(".magnetic");
+    const label = btn.querySelector("span");
+
+    // 目标偏移（由鼠标决定）与当前偏移（每帧向目标 lerp），分开存才有"缓动跟随"的感觉
+    let target = { x: 0, y: 0 };
+    let current = { x: 0, y: 0 };
+
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    btn.addEventListener("mousemove", (e) => {
+      const r = btn.getBoundingClientRect();
+      // 鼠标相对按钮中心的偏移，乘以强度系数得到磁吸位移
+      target.x = (e.clientX - r.left - r.width / 2) * 0.35;
+      target.y = (e.clientY - r.top - r.height / 2) * 0.35;
+    });
+
+    btn.addEventListener("mouseleave", () => {
+      target.x = 0;
+      target.y = 0;
+    });
+
+    (function tick() {
+      // 0.12 是缓动速度：越小越"黏"，越大越跟手
+      current.x = lerp(current.x, target.x, 0.12);
+      current.y = lerp(current.y, target.y, 0.12);
+      btn.style.transform = `translate(${current.x}px, ${current.y}px)`;
+      // 文字层位移系数更大，与按钮形成视差层次
+      label.style.transform = `translate(${current.x * 0.4}px, ${current.y * 0.4}px)`;
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>
