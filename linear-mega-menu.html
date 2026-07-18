@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linear 导航栏 Mega Menu 切换动效 Linear Mega Menu</title>
+    <meta
+      name="description"
+      content="1:1 复刻 Linear 官网导航 mega menu：持久容器 + 瞬态内容架构——hover 弹出毛玻璃面板（scaleIn），Product/Resources 间切换时旧内容按方向淡出滑走、新内容从另一侧淡入（data-motion + keyframes，0.18s ease-in-out-quad），容器宽高经 JS 测量写入 CSS 变量后由 0.22s transition 平滑过渡。"
+    />
+    <meta name="source" content="https://linear.app" />
+    <style>
+      /* 原版的 @font-face：Inter Variable 可变字体（100-900 全字重一个文件） */
+      @font-face {
+        font-family: "Inter Variable";
+        font-weight: 100 900;
+        font-display: swap;
+        font-style: normal;
+        src: url(https://static.linear.app/fonts/InterVariable.woff2?v=4.1)
+          format("woff2");
+      }
+      @font-face {
+        font-family: "Inter Variable";
+        font-weight: 100 900;
+        font-display: swap;
+        font-style: italic;
+        src: url(https://static.linear.app/fonts/InterVariable-Italic.woff2?v=4.1)
+          format("woff2");
+      }
+
+      /* ============ 设计令牌（来自原版 index.BGg4XGWg.css 的 :root） ============ */
+      :root {
+        --header-height: 72px;
+        --header-blur: 20px;
+
+        --homepage-outer-padding: 46px;
+        --homepage-max-width: calc(1344px + var(--homepage-outer-padding) * 2);
+        --homepage-padding-inset: 32px;
+
+        --page-padding-inline: 24px;
+        --page-padding-right: max(
+          env(safe-area-inset-right),
+          var(--page-padding-inline)
+        );
+
+        --layer-header: 100;
+        --speed-quickTransition: 0.1s;
+        --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        --radius-rounded: 9999px;
+
+        /* 原版的字重梯度（Inter Variable 可变字重） */
+        --font-weight-light: 300;
+        --font-weight-normal: 400;
+        --font-weight-medium: 510;
+        --font-weight-semibold: 590;
+        --font-weight-bold: 680;
+
+        --layer-max: 10000;
+        --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+
+        /* 暗色主题下的取值 */
+        --header-bg: #0b0b0bcc;
+        --header-border: #ffffff14;
+        --color-bg-primary: #08090a;
+        --color-text-primary: #f7f8f8;
+        --color-text-secondary: #d0d6e0;
+        --color-text-tertiary: #8a8f98;
+        --color-border-primary: #23252a;
+        --color-bg-translucent: #ffffff0d;
+        --color-border-translucent: #ffffff0d;
+        --color-bg-quinary: #282828;
+        --color-link-primary: #828fff;
+        --color-button-invert-bg: #e5e5e6;
+        --shadow-stack-low:
+          0px 8px 2px 0px #0000, 0px 5px 2px 0px #00000003,
+          0px 3px 2px 0px #0000000a, 0px 1px 1px 0px #00000012,
+          0px 0px 1px 0px #00000014;
+      }
+
+      /* 原版的变量断点：留白随视口宽度变化 */
+      @media (max-width: 1280px) {
+        :root {
+          --homepage-outer-padding: 10px;
+        }
+      }
+      @media (max-width: 1024px) {
+        :root {
+          --homepage-outer-padding: 28px;
+          --homepage-padding-inset: 8px;
+        }
+      }
+      @media (max-width: 640px) {
+        :root {
+          --homepage-outer-padding: 16px;
+          --header-height: 64px;
+        }
+      }
+
+      /* 原版 @layer reset 里的全局盒模型重置：
+         没有它，width:100% + padding 会按 content-box 溢出容器 */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: 100%;
+        font-weight: var(--font-weight-normal);
+      }
+
+      body {
+        margin: 0;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        /* 原版的完整字体栈（--sx-1ipkkxf） */
+        font-family:
+          "Inter Variable", "SF Pro Display", -apple-system,
+          BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+          "Open Sans", "Helvetica Neue", "Linear Thai", sans-serif;
+        /* macOS 上让文字变细的关键：抗锯齿渲染（原版 body 同款） */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* Inter 的字形特性开关 + 可变字体光学尺寸（原版 body 同款） */
+        --font-settings: "cv01", "ss03";
+        font-feature-settings: var(--font-settings);
+        --font-variations: "opsz" auto;
+        font-variation-settings: var(--font-variations);
+      }
+
+      /* 原版 hCgVwa_reset-button：清掉 button 的默认样式 */
+      .reset-button {
+        appearance: none;
+        background: none;
+        border: none;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ============ Header（原版 TZTsQG_header） ============ */
+      .header {
+        position: fixed;
+        top: 0;
+        inset-inline: 0;
+        margin-inline: auto;
+        z-index: var(--layer-header);
+        user-select: none;
+        isolation: isolate;
+        /* 弹窗移除滚动条时补偿位移，平时为 0 */
+        transform: translateX(
+          calc(-1 * var(--removed-body-scroll-bar-size, 0px) / 2)
+        );
+        backdrop-filter: blur(var(--header-blur));
+        background: linear-gradient(
+          180deg,
+          var(--header-bg) 0%,
+          color-mix(in oklab, var(--header-bg) 100%, transparent 5%) 100%
+        );
+        border-bottom: 1px solid var(--header-border);
+        transition: var(--speed-quickTransition) var(--ease-out-quad);
+        transition-property: border-color, background;
+      }
+
+      .header::before {
+        content: "";
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          var(--color-bg-primary) 0%,
+          transparent 100%
+        );
+        position: absolute;
+        inset: 0;
+      }
+
+      /* 原版 TZTsQG_menuRoot */
+      .menuRoot {
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
+      @media (max-width: 768px) {
+        .menuRoot {
+          flex-direction: column;
+        }
+      }
+
+      /* 原版 TZTsQG_innerWrapper */
+      .innerWrapper {
+        height: var(--header-height);
+        width: 100%;
+        max-width: var(--homepage-max-width);
+        padding-left: calc(
+          var(--homepage-padding-inset) + var(--homepage-outer-padding) - 1px
+        );
+        padding-right: calc(
+          var(--homepage-padding-inset) + var(--homepage-outer-padding) - 1px
+        );
+        align-items: center;
+        margin-inline: auto;
+        display: flex;
+      }
+      .innerWrapper > div {
+        width: 100%;
+      }
+
+      /* 原版 TZTsQG_list */
+      .list {
+        min-height: var(--header-height);
+        align-items: center;
+        gap: 8px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+      }
+      @media (max-width: 768px) {
+        .list {
+          justify-content: flex-start;
+          gap: 16px;
+        }
+      }
+
+      /* 原版 TZTsQG_item */
+      .item {
+        white-space: nowrap;
+        margin: 0;
+        list-style: none;
+        display: grid;
+      }
+
+      /* 原版 TZTsQG_logoItem：flex:1 吃掉剩余空间，把右侧区推到最右 */
+      .logoItem {
+        color: var(--color-text-primary);
+        flex: 1;
+        justify-content: flex-start;
+        display: flex;
+      }
+
+      /* 原版 TZTsQG_logoLink（含 I_mUeq_root 的链接 reset） */
+      .logoLink {
+        border-radius: 6px;
+        justify-content: flex-start;
+        align-items: center;
+        height: 32px;
+        margin-left: -8px;
+        padding: 0 8px;
+        display: flex;
+        color: inherit;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      /* 原版 TZTsQG_rightSideWrapper */
+      .rightSideWrapper {
+        flex-shrink: 0;
+        align-items: center;
+        width: 100%;
+        max-width: 620px;
+        margin: 0;
+        display: flex;
+      }
+      @media (max-width: 1024px) {
+        .rightSideWrapper {
+          width: auto;
+        }
+      }
+
+      /* 原版 TZTsQG_navItems */
+      .navItems {
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+      }
+
+      /* 原版 TZTsQG_navDivider：菜单和按钮之间的竖线 */
+      .navDivider {
+        background: var(--color-border-primary);
+        width: 1px;
+        height: 16px;
+        margin-inline: 8px;
+      }
+
+      /* 原版 TZTsQG_buttons */
+      .buttons {
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+      }
+
+      /* 原版 TZTsQG_buttonItem */
+      .buttonItem {
+        justify-content: center;
+        align-items: center;
+        display: flex;
+      }
+      .buttonItem a,
+      .buttonItem span {
+        width: 100%;
+      }
+
+      /* 原版 TZTsQG_anchor：导航链接/触发器的公共样式（hover 态未实现） */
+      .anchor {
+        --anchor-glass-bg: #ffffff14;
+        height: 32px;
+        color: var(--color-text-tertiary);
+        border-radius: var(--radius-rounded);
+        transition: var(--speed-quickTransition) var(--ease-out-quad);
+        transition-property: color, background;
+        background: 0 0;
+        justify-content: center;
+        align-items: center;
+        padding: 0 12px;
+        font-size: 13px;
+        display: flex;
+        position: relative;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      /* 原版的 hover：包在 any-hover 里，触屏设备不生效。
+         进入/移开都走基态那条 0.1s transition（color, background），
+         完全对称；背景色太淡所以移开时的渐隐不易察觉 */
+      @media (any-hover: hover) {
+        .anchor:hover {
+          color: var(--color-text-primary);
+          background: var(--anchor-glass-bg);
+        }
+      }
+
+      /* 菜单打开时 trigger 保持高亮（原版 [data-state=open]） */
+      .anchor[data-state="open"] {
+        color: var(--color-text-primary);
+        background: var(--anchor-glass-bg);
+      }
+
+      /* 原版 TZTsQG_trigger：扩大热区 + 打开时在按钮下方伸出一座
+         "隐形桥"，让光标从按钮移到菜单面板的路上菜单不会关闭 */
+      .trigger {
+        isolation: isolate;
+        position: relative;
+      }
+      .trigger::before {
+        content: "";
+        z-index: 0;
+        position: absolute;
+        inset: 0 -8px;
+      }
+      .trigger[data-state="open"]::after {
+        content: "";
+        height: 32px;
+        position: absolute;
+        top: 100%;
+        left: -32px;
+        right: -32px;
+      }
+
+      /* 原版 S36ykG_root + S36ykG_variant + S36ykG_variant-invert + S36ykG_size-small
+         （Sign up 按钮，hover 态未实现，:active 缩放保留） */
+      .button {
+        appearance: none;
+        cursor: pointer;
+        white-space: nowrap;
+        user-select: none;
+        max-width: 100%;
+        flex-shrink: 0;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        display: inline-flex;
+        position: relative;
+        font-weight: var(--font-weight-medium);
+        font-size: 13px;
+        line-height: 32px;
+        height: 32px;
+        gap: 8px;
+        padding: 0 12px;
+        border-radius: var(--radius-rounded);
+        background: var(--color-button-invert-bg);
+        border: 1px solid var(--color-button-invert-bg);
+        color: var(--color-bg-primary);
+        box-shadow: var(--shadow-stack-low);
+        text-decoration: none;
+        transition: 0.16s var(--ease-out-quad);
+        transition-property:
+          border, background-color, color, box-shadow, opacity, filter,
+          transform;
+      }
+      .button:active {
+        transform: scale(0.97);
+      }
+
+      /* 原版 TZTsQG_mobileItem / TZTsQG_mobileMenuTrigger：移动端汉堡菜单 */
+      .mobileItem {
+        display: none;
+      }
+      .mobileItem.mobileItem {
+        margin-left: calc(-1 * var(--page-padding-right) + 8px);
+      }
+      @media (max-width: 768px) {
+        .mobileItem {
+          display: block;
+        }
+      }
+      .mobileMenuTrigger {
+        height: var(--header-height);
+        aspect-ratio: 1;
+        outline: none;
+        justify-content: center;
+        align-items: center;
+        margin-right: -28px;
+        display: flex;
+      }
+
+      /* ============ Mega Menu（原版 TZTsQG_viewport / content 系列） ============ */
+
+      /* 原版 hCgVwa_reset-ul */
+      .reset-ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      /* 原版 TZTsQG_viewportPosition：固定在 header 下方，
+         与 innerWrapper 同一套 max-width/padding 令牌，因此面板右缘
+         与导航区右缘对齐（justify-content: flex-end） */
+      .viewportPosition {
+        top: calc(var(--header-height) - 8px);
+        z-index: var(--layer-max);
+        pointer-events: none;
+        max-width: var(--homepage-max-width);
+        padding-right: calc(
+          var(--homepage-padding-inset) + var(--homepage-outer-padding) - 1px
+        );
+        justify-content: flex-end;
+        margin-inline: auto;
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+      }
+      .viewportPosition > * {
+        pointer-events: auto;
+      }
+
+      /* 原版 TZTsQG_viewport：毛玻璃圆角面板。
+         height/width 由 JS 按当前内容测量写入（原版是 radix 的
+         --radix-navigation-menu-viewport-* 变量），.22s 过渡先保留，
+         菜单间切换动画下回合实现 */
+      .viewport {
+        --inner-card-border: 1px;
+        height: max(var(--viewport-height, 0px), 236px);
+        width: var(--viewport-width, auto);
+        max-width: calc(
+          100vw - var(--page-padding-left, 24px) - var(--page-padding-right)
+        );
+        backdrop-filter: blur(32px);
+        transform-origin: top;
+        background: #08090ae6;
+        border: 1px solid #ffffff14;
+        border-radius: 14px;
+        padding: 8px;
+        transition:
+          height 0.22s,
+          width 0.22s;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px #08090a;
+      }
+      .viewport[hidden] {
+        display: none;
+      }
+
+      /* 内层亮一度的卡片（盖住网格区，不含 footer），高度由 JS 写入 */
+      .viewport::before {
+        content: "";
+        height: var(--inner-card-height, 0px);
+        background: var(--color-bg-translucent);
+        border: var(--inner-card-border) solid var(--color-border-translucent);
+        border-radius: 6px;
+        transition: height 0.22s;
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        right: 8px;
+      }
+
+      /* 原版 TZTsQG_content */
+      .content {
+        transform-origin: top;
+        will-change: transform;
+        padding: 8px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+      .content.productNav,
+      .content.resourcesNav {
+        width: fit-content;
+      }
+      .content.resourcesNav {
+        max-width: 856px;
+      }
+      .content > div {
+        height: 100%;
+      }
+      @media (max-width: 640px) {
+        .content {
+          display: none;
+        }
+      }
+
+      /* 原版 TZTsQG_subnav / TZTsQG_subItems / TZTsQG_featureGrid */
+      .subnav {
+        height: 100%;
+      }
+      .subItems {
+        grid-template-columns: 256px 256px 256px;
+        column-gap: 24px;
+        padding: 12px;
+        display: grid;
+      }
+      .featureGrid {
+        margin: 0;
+      }
+      .flexCol20 {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .resourcesNav {
+        grid-template-columns: 256px 256px 256px;
+      }
+
+      /* 原版 TZTsQG_inlineLink：菜单里的一条链接（标题+描述） */
+      .inlineLink {
+        border-radius: 6px;
+        padding: 12px 16px;
+        transition: none;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      /* 列与列之间的分隔线：画在每个条目右侧 12px 处（列间距的一半） */
+      .inlineLink::after {
+        content: "";
+        background: var(--color-border-translucent);
+        width: 1px;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: -12px;
+      }
+      @media (any-hover: hover) {
+        .inlineLink:hover {
+          color: var(--color-text-primary);
+          background: #ffffff08;
+        }
+      }
+
+      /* 原版实测：13px / 19.5px（1.5 倍行高） */
+      .menuLabel {
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--color-text-tertiary);
+      }
+      .menuDesc {
+        font-size: 13px;
+        line-height: 1.5;
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-secondary);
+      }
+
+      /* 原版 TZTsQG_contentFooter + ghost 按钮（S36ykG_variant-ghost small） */
+      .contentFooter {
+        justify-content: space-between;
+        max-width: 100%;
+        padding: 16px 16px 11px;
+        display: flex;
+      }
+      .ghostButton {
+        appearance: none;
+        cursor: pointer;
+        white-space: nowrap;
+        user-select: none;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        display: inline-flex;
+        font-size: 13px;
+        font-weight: var(--font-weight-medium);
+        line-height: 32px;
+        height: 32px;
+        padding: 0 12px;
+        border: none;
+        border-radius: var(--radius-rounded);
+        color: var(--color-text-tertiary);
+        background: 0 0;
+        text-decoration: none;
+        transition: 0.16s var(--ease-out-quad);
+        transition-property: background-color, color;
+      }
+      .changelogSingleLink {
+        gap: 12px;
+        min-width: 0;
+        max-width: 80%;
+      }
+      .changelogSingleLink .menuDesc {
+        color: var(--color-text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      @media (any-hover: hover) {
+        .changelogSingleLink:hover {
+          background: #ffffff12 !important;
+        }
+        .changelogLink:hover {
+          background: #818fff26 !important;
+        }
+      }
+
+      /* ============ 菜单切换动画（原版 data-motion 机制） ============
+         方向感：从 Product 切到 Resources（向右走），旧内容向左退场
+         (to-start)、新内容从右进场 (from-end)；反向则相反。
+         包在 prefers-reduced-motion 里，系统关闭动画时不播 */
+      @media (prefers-reduced-motion: no-preference) {
+        .content {
+          --duration: 0.18s;
+          --anim-amount: 48px;
+          animation: var(--duration) var(--ease-in-out-quad) both;
+        }
+        .content[data-motion="from-start"] {
+          animation-name: enterFromLeft;
+        }
+        .content[data-motion="from-end"] {
+          animation-name: enterFromRight;
+        }
+        .content[data-motion="to-start"] {
+          animation-name: exitToLeft;
+        }
+        .content[data-motion="to-end"] {
+          animation-name: exitToRight;
+        }
+
+        /* 面板整体的开/合动画（原版 scaleIn/scaleOut） */
+        .viewport {
+          animation: 0.18s both scaleIn;
+        }
+        .viewport[data-state="closed"] {
+          animation: 0.18s both scaleOut;
+        }
+      }
+
+      @keyframes enterFromRight {
+        0% {
+          opacity: 0;
+          transform: translateX(var(--anim-amount));
+        }
+        to {
+          opacity: 1;
+          transform: translate(0);
+        }
+      }
+      @keyframes enterFromLeft {
+        0% {
+          opacity: 0;
+          transform: translateX(calc(-1 * var(--anim-amount)));
+        }
+        to {
+          opacity: 1;
+          transform: translate(0);
+        }
+      }
+      @keyframes exitToRight {
+        0% {
+          opacity: 1;
+          transform: translate(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(var(--anim-amount));
+        }
+      }
+      @keyframes exitToLeft {
+        0% {
+          opacity: 1;
+          transform: translate(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(calc(-1 * var(--anim-amount)));
+        }
+      }
+      @keyframes scaleIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes scaleOut {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+      }
+
+      /* 原版响应式工具类（utils.css） */
+      @media (max-width: 640px) {
+        .hide-mobile {
+          display: none !important;
+        }
+      }
+      @media (max-width: 768px) {
+        .hide-tablet {
+          display: none !important;
+        }
+      }
+      @media (max-width: 1024px) {
+        .hide-laptop {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <nav aria-label="Main" class="menuRoot">
+        <div class="innerWrapper">
+          <div style="position: relative">
+            <ul class="list" aria-label="Site navigation">
+              <li class="logoItem item">
+                <span style="display: flex">
+                  <a href="#" aria-label="Navigate to home" class="logoLink">
+                    <svg
+                      height="22"
+                      viewBox="0 0 400 100"
+                      fill="currentColor"
+                      aria-label="Linear"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M12.9266 16.3713c-.5283.5806-.4933 1.4714.0617 2.0265l68.5946 68.5946c.5551.555 1.4459.59 2.0265.0617 10.0579-9.1522 16.3713-22.3478 16.3713-37.0179C99.9807 22.402 77.5788 0 49.9445 0 35.2744 0 22.0788 6.31337 12.9266 16.3713ZM4.35334 29.3894c-.25348.5589-.12567 1.2142.30824 1.6481L68.9432 95.3191c.4339.4339 1.0892.5617 1.6481.3083 1.485-.6736 2.9312-1.4176 4.3344-2.2277.8341-.4815.9618-1.6195.2808-2.3005L8.88146 24.7742c-.68097-.681-1.81894-.5532-2.30045.2808-.81013 1.4032-1.55411 2.8494-2.22767 4.3344ZM.453579 47.796c-.300979-.301-.46112014-.7158-.4327856-1.1405.1327026-1.9891.3816396-3.9463.7400796-5.865.214926-1.1505 1.620727-1.5497 2.448307-.7222L59.9124 96.7715c.8275.8276.4283 2.2334-.7222 2.4483-1.9187.3585-3.8759.6074-5.865.7401-.4247.0283-.8395-.1318-1.1405-.4328L.453579 47.796ZM3.93331 61.7589c-1.0331-1.0331-2.70028-.1429-2.32193 1.2683C6.22104 80.2203 19.7604 93.7597 36.9535 98.3693c1.4112.3784 2.3014-1.2888 1.2683-2.3219L3.93331 61.7589ZM201.602 27.535c3.587 0 6.494-2.918 6.494-6.5175S205.189 14.5 201.602 14.5c-3.586 0-6.493 2.918-6.493 6.5175s2.907 6.5175 6.493 6.5175Zm-55.621 56.8396V14.5039h11.54v59.648h31.115v10.2227h-42.655Zm82.136-28.511v28.511h-11.166V34.8555h11.026v8.4876l.14-.0937c1.121-2.6573 2.928-4.8769 5.42-6.6589 2.491-1.8132 5.668-2.7198 9.531-2.7198 3.426 0 6.54.766 9.344 2.2978 2.803 1.5006 5.045 3.7045 6.727 6.6119 1.682 2.9074 2.523 6.4713 2.523 10.6916v30.9026h-11.166V55.0195c0-3.7514-.997-6.5963-2.99-8.5345-1.962-1.9695-4.594-2.9543-7.896-2.9543-2.118 0-4.049.4377-5.793 1.313-1.744.8754-3.13 2.2196-4.158 4.0328-1.028 1.8132-1.542 4.1422-1.542 6.9871Zm101.105 27.6669c2.554 1.0942 5.482 1.6413 8.783 1.6413 2.71 0 5.03-.3439 6.961-1.0317 1.932-.719 3.52-1.6725 4.766-2.8605 1.277-1.1879 2.289-2.4853 3.037-3.8921h.187v6.9871h10.699V50.2833c0-2.4072-.468-4.6111-1.402-6.6119-.934-2.0008-2.289-3.7358-4.065-5.2051-1.744-1.4694-3.862-2.5948-6.354-3.3763-2.491-.8129-5.295-1.2193-8.409-1.2193-4.267 0-7.958.7347-11.073 2.204-3.084 1.4381-5.497 3.3763-7.242 5.8148-1.744 2.4384-2.694 5.1895-2.85 8.2531h10.793c.124-1.438.623-2.7198 1.495-3.8452.872-1.1254 2.056-2.0008 3.551-2.626 1.495-.6565 3.223-.9848 5.186-.9848 1.962 0 3.628.3283 4.999.9848 1.401.6565 2.476 1.5475 3.223 2.6729.748 1.1254 1.122 2.4384 1.122 3.939v.3752c0 1.1254-.39 1.9538-1.168 2.4853-.748.5314-2.025.9222-3.831 1.1723-1.776.2501-4.205.5471-7.289.891-2.523.2813-4.952.7034-7.288 1.2661-2.336.5627-4.423 1.3912-6.261 2.4853-1.806 1.0942-3.239 2.5479-4.298 4.3611-1.059 1.8132-1.588 4.1422-1.588 6.987 0 3.2826.747 6.0336 2.242 8.2532 1.495 2.1884 3.52 3.8453 6.074 4.9707Zm18.081-8.3001c-1.807.9691-4.034 1.4537-6.681 1.4537-2.679 0-4.813-.5627-6.401-1.6881-1.589-1.1567-2.383-2.7355-2.383-4.7362 0-1.5631.436-2.8293 1.308-3.7984.904-.9691 2.087-1.735 3.551-2.2977 1.464-.5628 3.052-.9535 4.765-1.1724 1.246-.1875 2.461-.3751 3.645-.5627 1.183-.2188 2.289-.422 3.317-.6096 1.028-.2188 1.9-.4377 2.616-.6565.748-.2188 1.293-.4533 1.635-.7034v5.5334c0 1.9382-.451 3.7202-1.355 5.3458-.872 1.5944-2.211 2.8917-4.017 3.8921Zm26.094 9.1442V34.8555h10.745v8.1594h.141c.903-2.8136 2.32-4.955 4.251-6.4244 1.962-1.5005 4.532-2.2508 7.709-2.2508.779 0 1.48.0312 2.102.0938.655.0312 1.2.0625 1.636.0937v10.082c-.405-.0625-1.122-.1406-2.149-.2344-1.028-.0938-2.118-.1407-3.271-.1407-1.838 0-3.519.422-5.046 1.2661-1.526.8441-2.741 2.1415-3.644 3.8921-.872 1.7195-1.308 3.8922-1.308 6.5182v28.4641h-11.166Zm-177.401 0V34.8555h11.166v49.5191h-11.166Zm84.238-2.204c3.582 2.2196 7.834 3.3294 12.755 3.3294 3.8 0 7.257-.6878 10.372-2.0633 3.146-1.4068 5.762-3.3294 7.849-5.7678 2.087-2.4697 3.442-5.3146 4.065-8.5346h-10.512c-.468 1.4693-1.231 2.7667-2.29 3.8921-1.027 1.0942-2.32 1.9539-3.877 2.5792-1.558.6252-3.364.9378-5.42.9378-2.772 0-5.155-.6252-7.148-1.8757-1.962-1.2505-3.457-2.9855-4.485-5.2051-.933-2.043-1.443-4.3564-1.529-6.9402h35.915v-3.0012c0-3.8139-.561-7.284-1.682-10.4102-1.121-3.1575-2.71-5.8773-4.766-8.1594-2.055-2.3134-4.531-4.0953-7.428-5.3458-2.866-1.2505-6.058-1.8757-9.578-1.8757-4.578 0-8.627 1.1098-12.147 3.3294-3.52 2.2196-6.276 5.2833-8.27 9.191-1.993 3.9078-2.99 8.3782-2.99 13.4114 0 5.0019.966 9.4568 2.897 13.3645 1.931 3.8765 4.688 6.9246 8.269 9.1442Zm23.501-32.7783c-1.028-2.1258-2.492-3.767-4.392-4.9237-1.9-1.1567-4.142-1.7351-6.728-1.7351-2.554 0-4.781.5784-6.681 1.7351-1.868 1.1567-3.332 2.7979-4.391 4.9237-.756 1.5396-1.234 3.2903-1.434 5.2521h25.059c-.2-1.9618-.678-3.7125-1.433-5.2521Z"
+                      ></path>
+                    </svg>
+                  </a>
+                </span>
+              </li>
+
+              <li class="rightSideWrapper">
+                <ul class="navItems">
+                  <li class="hide-tablet item">
+                    <button
+                      class="anchor trigger reset-button"
+                      data-menu-trigger="product"
+                      aria-expanded="false"
+                    >
+                      Product
+                    </button>
+                  </li>
+                  <li class="hide-tablet item">
+                    <button
+                      class="anchor trigger reset-button"
+                      data-menu-trigger="resources"
+                      aria-expanded="false"
+                    >
+                      Resources
+                    </button>
+                  </li>
+                  <li class="hide-tablet item">
+                    <a href="#" class="anchor">Customers</a>
+                  </li>
+                  <li class="hide-tablet item">
+                    <a href="#" class="anchor">Pricing</a>
+                  </li>
+                  <li class="hide-laptop item">
+                    <a href="#" class="anchor">Now</a>
+                  </li>
+                  <li class="hide-tablet item">
+                    <a href="#" class="anchor">Contact</a>
+                  </li>
+                </ul>
+
+                <div style="flex: 1"></div>
+                <div class="navDivider hide-tablet"></div>
+                <div style="flex: 1"></div>
+
+                <ul class="buttons">
+                  <li class="buttonItem item">
+                    <span><a href="#" class="anchor">Log in</a></span>
+                  </li>
+                  <li class="buttonItem item">
+                    <a href="#" class="button">Sign up</a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="mobileItem item">
+                <button type="button" class="mobileMenuTrigger reset-button">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect
+                      x="1"
+                      y="7.5"
+                      width="14"
+                      height="1"
+                      rx="0.5"
+                      style="
+                        transform-origin: center;
+                        transition: 160ms var(--ease-out-quad);
+                        transform: translateY(-3.5px);
+                      "
+                    ></rect>
+                    <rect
+                      x="1"
+                      y="7.5"
+                      width="14"
+                      height="1"
+                      rx="0.5"
+                      style="
+                        transform-origin: center;
+                        transition: 160ms var(--ease-out-quad);
+                        transform: translateY(3.5px);
+                      "
+                    ></rect>
+                  </svg>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 原版 TZTsQG_viewportPosition > TZTsQG_viewport：
+             两份菜单内容都渲染在这，JS 控制显示哪份（原版由 radix 挂卸载） -->
+        <div class="viewportPosition">
+          <div class="viewport" data-state="closed" hidden>
+            <!-- Product 菜单 -->
+            <div class="content productNav" data-menu="product">
+              <ul class="subnav reset-ul">
+                <li class="featureGrid">
+                  <div class="flexCol20">
+                    <ul class="subItems reset-ul">
+                      <li class="item">
+                        <a href="#" class="inlineLink">
+                          <span class="menuLabel">Intake</span>
+                          <span class="menuDesc"
+                            >Make your product <br />operations
+                            self-driving</span
+                          >
+                        </a>
+                      </li>
+                      <li class="item">
+                        <a href="#" class="inlineLink">
+                          <span class="menuLabel">Build</span>
+                          <span class="menuDesc"
+                            >Move work forward across<br />teams and
+                            agents</span
+                          >
+                        </a>
+                      </li>
+                      <li class="item">
+                        <a href="#" class="inlineLink">
+                          <span class="menuLabel">Monitor</span>
+                          <span class="menuDesc"
+                            >Understand progress<br />at scale</span
+                          >
+                        </a>
+                      </li>
+                      <li class="item">
+                        <a href="#" class="inlineLink">
+                          <span class="menuLabel">Plan</span>
+                          <span class="menuDesc"
+                            >Plan and navigate from<br />idea to launch</span
+                          >
+                        </a>
+                      </li>
+                      <li class="item">
+                        <a href="#" class="inlineLink">
+                          <span class="menuLabel">Diffs</span>
+                          <span class="menuDesc"
+                            >Make code review<br />effortless</span
+                          >
+                        </a>
+                      </li>
+                      <li class="item">
+                        <a href="#" class="inlineLink">
+                          <span class="menuLabel">Integrations</span>
+                          <span class="menuDesc">Collaborate across tools</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+              <div class="contentFooter">
+                <a href="#" class="ghostButton changelogSingleLink">
+                  <span class="menuDesc">New: Initiative properties</span>
+                </a>
+                <a href="#" class="ghostButton changelogLink hide-tablet">
+                  <span style="color: var(--color-link-primary)">Changelog</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Resources 菜单 -->
+            <div class="content resourcesNav" data-menu="resources">
+              <ul class="subnav reset-ul subItems resourcesNav">
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">About</span>
+                    <span class="menuDesc">Meet the team</span>
+                  </a>
+                </li>
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">Developers</span>
+                    <span class="menuDesc">Build on the Linear API</span>
+                  </a>
+                </li>
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">Switch to Linear</span>
+                    <span class="menuDesc">Migration guide</span>
+                  </a>
+                </li>
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">Careers</span>
+                    <span class="menuDesc">We&rsquo;re hiring</span>
+                  </a>
+                </li>
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">Security</span>
+                    <span class="menuDesc">Safe, secure, and private</span>
+                  </a>
+                </li>
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">Enterprise</span>
+                    <span class="menuDesc">Build products at scale</span>
+                  </a>
+                </li>
+                <li class="item" aria-hidden="true"></li>
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">Docs</span>
+                    <span class="menuDesc">How to use Linear</span>
+                  </a>
+                </li>
+                <li class="item">
+                  <a href="#" class="inlineLink">
+                    <span class="menuLabel">Mobile</span>
+                    <span class="menuDesc">Get the mobile app</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <script>
+      // 模拟 radix NavigationMenu 的悬停开合 + data-motion 切换动画
+      const viewport = document.querySelector(".viewport");
+      const position = document.querySelector(".viewportPosition");
+      const contents = [...document.querySelectorAll(".content")];
+      const triggers = [...document.querySelectorAll("[data-menu-trigger]")];
+      // 菜单从左到右的次序，决定切换动画的方向
+      const order = { product: 0, resources: 1 };
+      const motionOK = matchMedia("(prefers-reduced-motion: no-preference)");
+      let closeTimer = null;
+      let openMenu = null;
+
+      function open(name) {
+        clearTimeout(closeTimer);
+        if (openMenu === name && viewport.dataset.state === "open") return;
+        const prev = viewport.hidden ? null : openMenu;
+        openMenu = name;
+
+        const active = contents.find((c) => c.dataset.menu === name);
+        const old = prev && prev !== name
+          ? contents.find((c) => c.dataset.menu === prev)
+          : null;
+
+        for (const c of contents) {
+          if (c !== active && c !== old) {
+            c.style.display = "none";
+            delete c.dataset.motion;
+          }
+        }
+        for (const t of triggers) {
+          const on = t.dataset.menuTrigger === name;
+          t.dataset.state = on ? "open" : "closed";
+          t.setAttribute("aria-expanded", on);
+        }
+
+        viewport.hidden = false;
+        viewport.dataset.state = "open";
+
+        if (old && motionOK.matches) {
+          // 向右切换：旧内容向左淡出，新内容从右侧向左淡入；反向相反
+          const goingRight = order[name] > order[prev];
+          old.dataset.motion = goingRight ? "to-start" : "to-end";
+          active.dataset.motion = goingRight ? "from-end" : "from-start";
+        } else if (old) {
+          old.style.display = "none";
+        }
+        active.style.display = "block";
+
+        // 原版 radix 把 viewport 尺寸设为 content 的自然尺寸（实测 856×268，
+        // 不补 viewport 自身的 padding/border）。content 因此在面板内右移下移
+        // 各 ~9px，右缘和底缘被 overflow:hidden 裁掉——第三列分隔线被裁掉、
+        // footer 底部变紧凑，都是这个"故意的裁切"产生的。
+        // 切换时更新这些变量，CSS 里 0.22s 的 transition 让宽高平滑变化
+        viewport.style.setProperty(
+          "--viewport-width",
+          active.offsetWidth + "px",
+        );
+        viewport.style.setProperty(
+          "--viewport-height",
+          active.offsetHeight + "px",
+        );
+        // 内层亮卡片只盖住网格区（不含 footer），原版实测比网格矮 1px
+        const grid = active.querySelector(".subnav");
+        viewport.style.setProperty(
+          "--inner-card-height",
+          grid.offsetHeight - 1 + "px",
+        );
+      }
+
+      // 出场动画播完后再真正隐藏旧内容；进场动画播完清掉 motion 标记
+      for (const c of contents) {
+        c.addEventListener("animationend", (e) => {
+          if (e.target !== c) return;
+          const m = c.dataset.motion;
+          if (m === "to-start" || m === "to-end") c.style.display = "none";
+          delete c.dataset.motion;
+        });
+      }
+
+      // 关闭：先播 scaleOut，动画结束才真正 hidden（reduced-motion 时直接藏）
+      viewport.addEventListener("animationend", (e) => {
+        if (e.target !== viewport) return;
+        if (viewport.dataset.state === "closed") hideViewport();
+      });
+
+      function hideViewport() {
+        viewport.hidden = true;
+        for (const c of contents) {
+          c.style.display = "none";
+          delete c.dataset.motion;
+        }
+      }
+
+      function scheduleClose() {
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => {
+          openMenu = null;
+          viewport.dataset.state = "closed";
+          if (!motionOK.matches) hideViewport();
+          for (const t of triggers) {
+            t.dataset.state = "closed";
+            t.setAttribute("aria-expanded", "false");
+          }
+        }, 120);
+      }
+
+      for (const t of triggers) {
+        t.addEventListener("pointerenter", () => open(t.dataset.menuTrigger));
+        t.addEventListener("pointerleave", scheduleClose);
+      }
+      position.addEventListener("pointerenter", () =>
+        clearTimeout(closeTimer),
+      );
+      position.addEventListener("pointerleave", scheduleClose);
+      // 悬停到无菜单的导航项/按钮时立即关闭
+      for (const a of document.querySelectorAll(
+        ".navItems .anchor:not(.trigger), .buttons .anchor, .buttons .button",
+      )) {
+        a.addEventListener("pointerenter", scheduleClose);
+      }
+    </script>
+  </body>
+</html>
