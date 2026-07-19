@@ -112,10 +112,16 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  /* 只有右侧「好」按钮有 hover 变色 + 按下缩放(whileTap: {scale: .97}) */
+  /* 只有右侧「好」按钮有 hover 变色 + 按下缩放(whileTap: {scale: .97})。
+     hover 变色是 Tailwind transition-colors:150ms cubic-bezier(.4,0,.2,1);
+     按下缩放是 Framer whileTap,未指定 transition,走它对 scale 的默认 spring
+     (stiffness 550 / damping 30 / mass 1,取自原站 bundle),下面的 linear()
+     是用 Framer 的 spring 生成器采样出来的同一条曲线,时长 100ms。 */
   .icon-button.good {
     transition: background-color .15s cubic-bezier(.4,0,.2,1),
-                transform .15s ease-out;
+                transform 100ms ease-in-out;   /* 不支持 linear() 时兜底 */
+    transition: background-color .15s cubic-bezier(.4,0,.2,1),
+                transform 100ms linear(0,0.0075,0.0285,0.0609,0.1026,0.1519,0.2070,0.2665,0.3289,0.3930,0.4579,0.5226,0.5862,0.6481,0.7078,0.7648,0.8188,0.8694,0.9166,0.9601,1);
   }
   .icon-button.good:hover  { background: var(--button-hover-bg); }
   .icon-button.good:active { transform: scale(.97); }
@@ -352,32 +358,46 @@ function setupButton(btn, withBlur) {
   let copied = false;                          // useState(false):初始都是剪贴板图标
   stack.appendChild(makeIcon(copied));         // initial={false}:首帧不播放动画
 
-  // 与原组件三元表达式一一对应的进出场关键帧
-  const hidden  = withBlur
-    ? { opacity: 0, transform: 'scale(0.8)', filter: 'blur(2px)' }
-    : { opacity: 0, transform: 'scale(1)',   filter: 'none' };
-  const visible = withBlur
-    ? { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' }
-    : { opacity: 1, transform: 'scale(1)', filter: 'none' };
-  const timing  = withBlur
-    ? { duration: 150, easing: 'ease-out', fill: 'both' }   // {duration:.15}(默认 easeOut)
-    : { duration: 250, easing: 'ease-in',  fill: 'both' };  // {duration:.25, ease:'easeIn'}
+  /* 三个通道的缓动在原版里并不相同,所以必须拆成两条动画:
+       opacity / filter → Framer 能交给 WAAPI 硬件加速,未写 ease 时缺省 easeOut
+       scale(transform) → transform 由多个 motion value 合成,无法单独加速,
+                          走 JS 逐帧,那条路的缺省是 easeInOut
+     实测原站组件:WAAPI 只收到 opacity 与 filter(150ms ease-out),
+     scale 由 JS 写 inline transform,采样与 easeInOut 完全吻合。
+     「坏」按钮显式写了 ease:'easeIn',两条通道统一 ease-in,且 scale 恒为 1。 */
+  const DUR       = withBlur ? 150 : 250;
+  const fadeEase  = withBlur ? 'ease-out'    : 'ease-in';
+  const scaleEase = withBlur ? 'ease-in-out' : 'ease-in';
+
+  const fadeHidden   = withBlur ? { opacity: 0, filter: 'blur(2px)' } : { opacity: 0, filter: 'none' };
+  const fadeVisible  = withBlur ? { opacity: 1, filter: 'blur(0px)' } : { opacity: 1, filter: 'none' };
+  const scaleHidden  = { transform: withBlur ? 'scale(0.8)' : 'scale(1)' };
+  const scaleVisible = { transform: 'scale(1)' };
+
+  function play(el, dir) {                       // dir: 'in' 进场 | 'out' 退场
+    const fade  = dir === 'in' ? [fadeHidden,  fadeVisible]  : [fadeVisible,  fadeHidden];
+    const scale = dir === 'in' ? [scaleHidden, scaleVisible] : [scaleVisible, scaleHidden];
+    el.animate(fade,  { duration: DUR, easing: fadeEase,  fill: 'both' });
+    el.animate(scale, { duration: DUR, easing: scaleEase, fill: 'both' });
+  }
 
   btn.addEventListener('click', () => {
     copied = !copied;
     btn.dataset.copied = String(copied);
 
-    // exit:当前图标淡出后移除(popLayout:两者同时叠在原位)
+    // exit:当前图标退场后移除(popLayout:两者同时叠在原位)
     const current = stack.querySelector('.icon:not([data-exiting])');
     if (current) {
       current.dataset.exiting = 'true';
-      current.animate([visible, hidden], timing)
-        .finished.then(() => current.remove()).catch(() => {});
+      play(current, 'out');
+      // 用定时器收尾而不是 animation.finished:后台标签页里时间线会被冻结,
+      // promise 永不 resolve,退场节点会一直堆在 DOM 里
+      setTimeout(() => current.remove(), DUR + 50);
     }
     // enter:新图标从 hidden 进场
     const next = makeIcon(copied);
     stack.appendChild(next);
-    next.animate([hidden, visible], timing);
+    play(next, 'in');
   });
 }
 
