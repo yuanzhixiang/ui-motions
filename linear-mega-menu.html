@@ -1092,22 +1092,50 @@
             t.dataset.state = "closed";
             t.setAttribute("aria-expanded", "false");
           }
-        }, 120);
+        }, 150);
       }
 
+      // radix 把指针回调包在 whenMouse 里,只认真鼠标,触屏与笔一律不走 hover 逻辑:
+      //   const whenMouse = (f) => (e) => e.pointerType === "mouse" ? f(e) : undefined
+      const whenMouse = (fn) => (e) => {
+        if (e.pointerType === "mouse") fn(e);
+      };
+
       for (const t of triggers) {
-        t.addEventListener("pointerenter", () => open(t.dataset.menuTrigger));
-        t.addEventListener("pointerleave", scheduleClose);
+        // radix 在 pointermove 上开菜单(带一次性守卫),不是 pointerenter。
+        // 差别在于:指针本就停在触发器上、由页面滚动或键盘关闭后重新"进入"时,
+        // pointerenter 会误开,pointermove 要真的动一下才开
+        let entered = false;
+        t.addEventListener("pointerenter", () => {
+          entered = false;
+        });
+        t.addEventListener(
+          "pointermove",
+          whenMouse(() => {
+            if (entered) return;
+            entered = true;
+            open(t.dataset.menuTrigger);
+          }),
+        );
+        t.addEventListener(
+          "pointerleave",
+          whenMouse(() => {
+            entered = false;
+            scheduleClose();
+          }),
+        );
       }
+      // 面板进入不带 whenMouse 守卫、离开带——与 radix 的 onContentEnter /
+      // whenMouse(onContentLeave) 一一对应
       position.addEventListener("pointerenter", () =>
         clearTimeout(closeTimer),
       );
-      position.addEventListener("pointerleave", scheduleClose);
+      position.addEventListener("pointerleave", whenMouse(scheduleClose));
       // 悬停到无菜单的导航项/按钮时立即关闭
       for (const a of document.querySelectorAll(
         ".navItems .anchor:not(.trigger), .buttons .anchor, .buttons .button",
       )) {
-        a.addEventListener("pointerenter", scheduleClose);
+        a.addEventListener("pointerenter", whenMouse(scheduleClose));
       }
     </script>
   <a id="ui-motions-source-link" href="https://github.com/yuanzhixiang/ui-motions/blob/main/linear-mega-menu.html" target="_blank" rel="noopener" aria-label="在 GitHub 查看源码" title="在 GitHub 查看源码" style="position:fixed;right:16px;bottom:16px;z-index:2147483647;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(20,22,26,.72);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:.65;transition:opacity .2s ease,transform .2s ease" onmouseover="this.style.opacity=1;this.style.transform='scale(1.08)'" onmouseout="this.style.opacity=.65;this.style.transform='scale(1)'"><svg width="20" height="20" viewBox="0 0 16 16" fill="#e8eaed" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
