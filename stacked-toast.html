@@ -102,7 +102,10 @@
     border-radius: 8px;
     padding: 10px 14px 13px;
     font-size: 13px;
-    transition: transform .4s, opacity .4s;   /* 缓动是默认 ease */
+    /* 原站简写为 transition: transform .4s, opacity .4s(未指定曲线,落到 ease);
+       这里显式写出 ease 的等价曲线 cubic-bezier(.25, .1, .25, 1),行为完全相同 */
+    transition: transform .4s cubic-bezier(.25, .1, .25, 1),
+                opacity   .4s cubic-bezier(.25, .1, .25, 1);
     box-shadow: 0 0 0 1px #00000014, 0 1px 2px -1px #00000014, 0 2px 4px #0000000a;
   }
   /* 进场前一帧:在栈位下方一个身位、完全透明 */
@@ -130,10 +133,20 @@
     will-change: transform;
     box-shadow: 0 0 0 1px #00000014, 0 2px 2px #0000000a;
     -webkit-tap-highlight-color: transparent;
-    transition: transform .15s ease-out;   /* whileHover/whileTap 的近似 */
+    /* 原版是 motion.button 的 whileHover / whileTap,未指定 transition,
+       走 Framer 对 scale 的默认 spring:stiffness 550 / damping 30 / mass 1 / restSpeed 10
+       (值取自原站 bundle 的 getDefaultTransition)。下面两条 linear() 是用 Framer 本体的
+       spring 生成器采样出来的同一条曲线 —— springs 从静止起步,所以是 S 形,不是 ease-out。
+       时长也由该 spring 的 rest 阈值决定:hover 位移小 → 67ms,tap 位移大 → 100ms。 */
+    transition: transform 67ms ease-in-out;   /* 不支持 linear() 的浏览器兜底 */
+    transition: transform 67ms linear(0.0000,0.0112,0.0424,0.0906,0.1527,0.2259,0.3079,0.3963,0.4892,0.5846,0.6811,0.7773,0.8719,0.9640,1.0000);
   }
   .add-button:hover  { transform: scale(1.01); }  /* whileHover: {scale: 1.01} */
-  .add-button:active { transform: scale(.97); }   /* whileTap:   {scale: .97} */
+  .add-button:active {                            /* whileTap:   {scale: .97} */
+    transform: scale(.97);
+    transition: transform 100ms ease-in-out;
+    transition: transform 100ms linear(0.0000,0.0075,0.0285,0.0609,0.1026,0.1519,0.2070,0.2665,0.3289,0.3930,0.4579,0.5226,0.5862,0.6481,0.7078,0.7648,0.8188,0.8694,0.9166,0.9601,1.0000);
+  }
 </style>
 </head>
 <body>
