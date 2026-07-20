@@ -1,0 +1,309 @@
+<title>Memo 转录面板 · 原版证据快照</title>
+<meta name="description" content="Memo 1.7.5 app.asar 解包产物中与转录面板相关的 CSS/JS 原始片段，作为复刻笔记的 ground truth 证据。">
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;max-width:960px;margin:0 auto;padding:32px 20px;line-height:1.7;color:#24292f;background:#fff}
+@media (prefers-color-scheme: dark){body{color:#d0d4dc;background:#16181d} pre{background:#1e2128!important;border-color:#2c303a!important} code{color:#c6cbd6}}
+h1{font-size:22px} h2{font-size:16px;margin-top:36px;border-bottom:1px solid #d8dee4;padding-bottom:6px}
+p{font-size:14px;color:#57606a}
+pre{background:#f6f8fa;border:1px solid #d8dee4;border-radius:8px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.55}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+<h1>Memo 转录面板 · 原版证据快照</h1>
+<p>来源：Memo.app 1.7.5（com.memo.whisper），<code>Contents/Resources/app.asar</code> 经 <code>npx @electron/asar extract</code> 解包。以下片段原样摘自 <code>dist/assets/index-f8b22a57.css</code> 与 <code>dist/assets/index-68aa31bb.js</code>（JS 已 js-beautify 展开，未改动内容）。提取时间 2026-07-20。</p>
+
+<section>
+<h2>shadcn 主题令牌（亮色）· CSS offset 201776</h2>
+<p><code>--primary: 238 50% 56%</code> 即 <code>#575BC7</code>。注意 <code>color-scheme:light dark</code>。</p>
+<pre><code>:root{color-scheme:light dark;--background: 0 0% 100%;--foreground: 222.2 84% 4.9%;--muted: 210 40% 96.1%;--muted-foreground: 215.4 16.3% 46.9%;--popover: 0 0% 100%;--popover-foreground: 233 16% 11%;--card: 0 0% 100%;--card-foreground: 222.2 84% 4.9%;--border: 204 22% 91%;--input: 214.3 31.8% 91.4%;--primary: 238 50% 56%;--primary-foreground: 210 40% 98%;--secondary: 210 40% 96.1%;--secondary-foreground: 238 50% 56%;--accent: 210 40% 96.1%;--accent-foreground: 238 50% 56%;--destructive: 0 84.2% 60.2%;--destructive-foreground: 210 40% 98%;--ring: 204 22% 91%;--sidebar-background: 0 0% 98%;--sidebar-foreground: 240 5.3% 26.1%;--sidebar-primary: 240 5.9% 10%;--sidebar-primary-foreground: 0 0% 98%;--sidebar-accent: 240 4.8% 95.9%;--sidebar-accent-foreground: 240 5.9% 10%;--sidebar-border: 220 13% 91%;--sidebar-ring: 217.2 91.2% 59.8%;--radius: .5rem}</code></pre>
+</section>
+<section>
+<h2>shadcn 主题令牌（暗色）· CSS offset 202670</h2>
+<p>暗色靠 <code>@media (prefers-color-scheme: dark)</code> 切换，产物中不存在 <code>.dark</code> 类方案。</p>
+<pre><code>@media (prefers-color-scheme: dark){:root{--background: 233 16% 11%;--foreground: 210 40% 98%;--muted: 235 14% 18%;--muted-foreground: 215 20.2% 65.1%;--popover: 233 16% 11%;--popover-foreground: 210 40% 98%;--card: 222.2 84% 4.9%;--card-foreground: 210 40% 98%;--border: 233 13% 25%;--input: 233 13% 25%;--primary: 238 50% 56%;--primary-foreground: 210 40% 98%;--secondary: 217.2 32.6% 17.5%;--secondary-foreground: 210 40% 98%;--accent: 217.2 32.6% 17.5%;--accent-foreground: 210 40% 98%;--destructive: 0 62.8% 30.6%;--destructive-foreground: 0 85.7% 97.3%;--ring: 233 13% 25%;--sidebar-background: 240 5.9% 10%;--sidebar-foreground: 240 4.8% 95.9%;--sidebar-primary: 224.3 76.3% 48%;--sidebar-primary-foreground: 0 0% 100%;--sidebar-accent: 240 3.7% 15.9%;--sidebar-accent-foreground: 240 4.8% 95.9%;--sidebar-border: 240 3.7% 15.9%;--sidebar-ring: 217.2 91.2% 59.8%}}</code></pre>
+</section>
+<section>
+<h2>旧版品牌变量 · CSS offset 281801</h2>
+<p>独立于 shadcn 令牌的一套历史变量，<code>--color-brand-color: #575bc7</code> 与主色互证。</p>
+<pre><code>:root{--color-brand-color: #575bc7;--color-bg-content: hsl(206, 37%, 96%);--color-bg-element: #ffffff;--color-bg-watermark: #999999;--color-line: hsl(204, 22%, 91%);--color-text-primary: #323232;--color-text-primary-s: #525866;--color-text-description: #87939d;--color-text-description-s: #afb8bf;--color-text-disable: #d7dbdf;--color-text-in-brand: #ffffff;--color-status-link: #01a0ff;--color-status-activity: #f29416;--color-status-danger: #ed4622;--line-width: 1px;--border-radius-small: 4px;--border-radius: 8px;--border-radius-normal: 8px;--border-radius-large: 16px;--margin-small: 4px;--margin-normal: 8px;--margin-large: 16px;--padding-small: 4px;--padding-normal: 8px;--padding-large: 16px;--box-shadow-normal: 0px 0px 4px rgba(0, 0, 0, .1);--box-shadow-large: 0px 4px 8px rgba(0, 0, 0, .1);--box-shadow-brand: 0px 4px 8px var(--color-brand-color);--transition-all: all .16s linear}</code></pre>
+</section>
+<section>
+<h2>.AimText 字幕行全部规则 · CSS offset 298571</h2>
+<p>注意这里没有 <code>.AimText.active</code>、没有 <code>.AimText:hover</code> 背景规则——全部 CSS 中相关选择器零命中，视觉高亮完全由行内 Tailwind 类承担。</p>
+<pre><code>.AimText{display:flex;align-items:flex-start;justify-content:center;gap:8px;position:relative;padding-left:var(--padding-large)}
+.AimText.AimText__translated .select{pointer-events:none;opacity:0}
+.AimText.AimText__lineReveal{opacity:0;animation:aim-line-glare-reveal var(--aim-line-reveal-duration, .8s) ease-out forwards}
+.AimText .AimText__lineRevealText{display:inline;color:inherit;background:linear-gradient(90deg,currentColor 0%,currentColor 42%,rgba(255,255,255,.95) 50%,currentColor 58%,currentColor 100%);background-size:260% 100%;background-position:100% 0;background-repeat:no-repeat;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:aim-text-glare-sweep var(--aim-line-reveal-duration, .8s) ease-out forwards}
+.AimText .highlight{position:relative;border-radius:2px;padding:0 1px;margin:0 -1px;background-color:#f7ce3b4d;border:1px solid rgba(247,206,59,.5);transition:all .2s ease;pointer-events:none}
+.AimText .highlight:hover{background-color:#f7ce3b66;border-color:#f7ce3b99}
+.AimText .highlight.active{background-color:#ca461633;border:1px solid rgba(202,70,22,.4)}
+.AimText .highlight.active:hover{background-color:#ca46164d;border-color:#ca461680}</code></pre>
+</section>
+<section>
+<h2>.TranscribePanel / .ConvertResult · CSS offset 307214</h2>
+<p>面板外壳与滚动容器。</p>
+<pre><code>.ConvertResult{height:100%;overflow-y:auto;overflow-x:hidden}
+.ConvertResult.ConvertResult--transcribing{display:flex;flex-direction:column;overflow:hidden}
+.TranscribePanel__timelinePreview{flex-shrink:0;border-top:1px solid hsl(var(--border));background:hsl(var(--background));padding:8px}</code></pre>
+</section>
+<section>
+<h2>全局字体栈 · CSS offset 311684</h2>
+<p></p>
+<pre><code>body,textarea{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,Helvetica Neue,Helvetica,Arial,PingFang SC,Hiragino Sans GB,Apple SD Gothic Neo,Noto Sans KR,Microsoft YaHei UI,Microsoft YaHei,Source Han Sans CN,sans-serif}</code></pre>
+</section>
+<section>
+<h2>字幕行组件（minified sgi/K$）· JS offset ≈3454493</h2>
+<p>以时间戳列 className 为锚点截取前后各 3KB。可见：时间戳列 <code>w-12 text-center</code>、#N 徽标 <code>group-hover:opacity-100 duration-300</code>、编辑态换 textarea（<code>W8</code> 组件，className 含 <code>bg-background</code> 无边框）、选中态 <code>bg-primary/30</code>。</p>
+<pre><code>agation();
+return
+}
+if (At.code === &quot;ArrowDown&quot;) {
+    if (!(At.ctrlKey || At.metaKey)) return;
+    const Ge = st.value,
+        $e = st.selectionStart,
+        wt = Ge.split(`
+`);
+    let _e = 0,
+        mt = 0;
+    for (let Bt = 0; Bt &lt; wt.length; Bt++)
+        if (mt += wt[Bt].length + 1, mt &gt; $e) {
+            _e = Bt;
+            break
+        } if (_e &lt; wt.length - 1) return;
+    const Ze = wt[wt.length - 1],
+        pt = $e - Ge.replace(Ze, &quot;&quot;).length;
+    At.preventDefault(), At.stopPropagation(), o == null || o.focusNextItem(n + 1, pt);
+    return
+}
+if (At.code === &quot;ArrowUp&quot;) {
+    if (!(At.ctrlKey || At.metaKey)) return;
+    const Ge = st.value,
+        $e = st.selectionStart,
+        wt = Ge.split(`
+`);
+    let _e = 0,
+        mt = 0;
+    for (let Ze = 0; Ze &lt; wt.length; Ze++)
+        if (mt += wt[Ze].length + 1, mt &gt; $e) {
+            _e = Ze;
+            break
+        } if (_e &gt; 0) return;
+    At.preventDefault(), At.stopPropagation(), n &gt; 0 &amp;&amp; (o == null || o.focusNextItem(n - 1, $e));
+    return
+}
+const X = st.selectionStart,
+    We = st.selectionEnd;
+if (At.code === &quot;Backspace&quot; &amp;&amp; We === X &amp;&amp; X === 0) {
+    if (console.log(&quot;合并上一项&quot;), n === 0) return;
+    p(), P(n)
+}
+}, He = _.useCallback(At =&gt; [(r || k[n]) &amp;&amp; &quot;bg-primary/30&quot;, &quot;Selecto_item p-2 flex-1 outline-none break-words cursor-pointer&quot;, At &amp;&amp; &quot;line-through pointer-events-none text-muted-foreground&quot;, r || k[n] ? &quot;&quot; : &quot;hover:text-muted-foreground&quot;], [r, n, k]), fe = _.useCallback((At, st) =&gt; At.tr === 0 &amp;&amp; st === &quot;&quot; ? m(&quot;span&quot;, {
+    className: &quot;select-none text-muted-foreground text-xs&quot;,
+    children: g(&quot;subtitle.no translation&quot;)
+}) : R &amp;&amp; S &amp;&amp; S !== &quot;&quot; ? m(Nae, {
+    keywords: S,
+    text: st,
+    useRegex: o == null ? void 0 : o.useRegex,
+    active: E[C] === n,
+    currentMatchIndex: o == null ? void 0 : o.currentMatchIndex,
+    lineIndex: n
+}) : st, [g, R, S, o == null ? void 0 : o.useRegex, o == null ? void 0 : o.currentMatchIndex, E, C, n]), K = &quot;resize-none block p-2 flex-1 outline-none box-border bg-background text-foreground&quot;, Q = At =&gt; {
+    F(n, At)
+}, ee = async At =&gt; {
+    const st = qn(I);
+    if (console.log(n, st, At), st) {
+        const {
+            speakers: X
+        } = st, We = Object.keys(X).map($e =&gt; Number($e.replace(&quot;SPEAKER_&quot;, &quot;&quot;))).sort(($e, wt) =&gt; wt - $e)[0], ht = We === void 0 ? 1 : We + 1, Ge = t || i;
+        Ge &amp;&amp; (st.speakers[`SPEAKER_${ht}`] = dn.utils.convertToSeconds(Ge.et) - dn.utils.convertToSeconds(Ge.st), st.settings[`SPEAKER_${ht}`] = {
+            name: At,
+            color: kHt(),
+            spk: `SPEAKER_${ht}`
+        }, await H(st), F(n, `SPEAKER_${ht}`))
+    }
+};
+return T(Zt, {
+    children: [c &amp;&amp; !e &amp;&amp; (t ? m(_Ne, {
+        isEmpty: !(t != null &amp;&amp; t.spk),
+        spk: t == null ? void 0 : t.spk,
+        color: t != null &amp;&amp; t.spk &amp;&amp; ((Me = (we = I == null ? void 0 : I.settings) == null ? void 0 : we[t.spk]) == null ? void 0 : Me.color) || &quot;&quot;,
+        name: t != null &amp;&amp; t.spk &amp;&amp; ((Ye = (Te = I == null ? void 0 : I.settings) == null ? void 0 : Te[t.spk]) == null ? void 0 : Ye.name) || &quot;&quot;,
+        onChange: L,
+        onChangeSpeaker: Q,
+        onAddSpeaker: ee,
+        speakerData: I
+    }) : i ? m(_Ne, {
+        isEmpty: !(i != null &amp;&amp; i.spk),
+        spk: i == null ? void 0 : i.spk,
+        color: i != null &amp;&amp; i.spk &amp;&amp; ((dt = (De = I == null ? void 0 : I.settings) == null ? void 0 : De[i.spk]) == null ? void 0 : dt.color) || &quot;&quot;,
+        name: i != null &amp;&amp; i.spk &amp;&amp; ((ot = (ze = I == null ? void 0 : I.settings) == null ? void 0 : ze[i.spk]) == null ? void 0 : ot.name) || &quot;&quot;,
+        onChange: L,
+        onChangeSpeaker: Q,
+        onAddSpeaker: ee,
+        speakerData: I
+    }) : null), t &amp;&amp; T(&quot;div&quot;, {
+        ref: v,
+        className: `AimText group${r||k[n]?&quot; active&quot;:&quot;&quot;}`,
+        children: [x ? k[n] ? m(&quot;div&quot;, {
+            className: On([&quot;cursor-pointer&quot;]),
+            onClick: de,
+            children: m(Ty, {
+                className: &quot;shrink-0 text-primary mt-3&quot;,
+                size: 18
+            })
+        }) : m(&quot;div&quot;, {
+            className: On([&quot;cursor-pointer text-foreground mt-3&quot;]),
+            onClick: de,
+            children: m(L7, {
+                className: &quot;shrink-0&quot;,
+                size: 18
+            })
+        }) : null, T(&quot;div&quot;, {
+            className: &quot;select-none pt-3 cursor-pointer text-muted-foreground text-xs hover:text-primary w-12 text-center relative&quot;,
+            onClick: () =&gt; V(t),
+            children: [T(&quot;span&quot;, {
+                className: &quot;text-xs absolute left-1/2 -translate-x-1/2 -top-1  group-hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300&quot;,
+                children: [&quot;#&quot;, n + 1]
+            }), dn.utils.cleanTimeDisplay(t.st)]
+        }), u ? m(W8, {
+            className: K,
+            value: t.text || &quot;&quot;,
+            maxLength: 1e4,
+            onChange: At =&gt; {
+                z({
+                    index: n,
+                    type: &quot;original&quot;,
+                    text: At.target.value
+                })
+            },
+            onBlur: ne,
+            autoFocus: !0,
+            onKeyUp: re,
+            onKeyDown: ce,
+            onKeyPress: xe,
+            onFocus: At =&gt; At.currentTarget.setSelectionRange(h.current, h.current)
+        }) : m(Wdt, {
+            disabled: N &gt;= 1,
+            isDeleted: t.delete,
+            isSelected: x,
+            onSelect: oe,
+            onCopy: ue,
+            onDelete: Z,
+            onRecover: ie,
+            onChangeSpeaker: Q,
+            speakerData: I,
+            spk: t == null ? void 0 : t.spk,
+            asChild: !0,
+            children: m(&quot;div&quot;, {
+                &quot;data-index&quot;: n,
+                className: On(He(t.delete)),
+                onClick: At =&gt; Y(At, t, &quot;original&quot;),
+                style: {
+                    whiteSpace: &quot;pre-wrap&quot;
+                },
+                children: fe(t, t.text || &quot;​&quot;)
+            })
+        })]
+    }), i &amp;&amp; T(&quot;div&quot;, {
+        className: `AimText group AimText__translated${r||k[n]?&quot; active&quot;:&quot;&quot;}`,
+        children: [x &amp;&amp; m(&quot;div&quot;, {
+            className: &quot;opacity-0 pointer-events-none&quot;,
+            children: m(L7, {
+                className: &quot;shrink-0&quot;,
+                size: 18
+            })
+        }), t ? m(&quot;div&quot;, {
+            className: &quot;select-none w-12&quot;
+        }) : T(&quot;div&quot;, {
+            className: &quot;select-none pt-3 cursor-pointer text-muted-foreground text-xs hover:text-primary w-12 text-center relative&quot;,
+            onClick: () =&gt; V(i),
+            children: [T(&quot;span&quot;, {
+                className: &quot;text-xs absolute left-1/2 -translate-x-1/2 -top-1 group-hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300&quot;,
+                children: [&quot;#&quot;, n + 1]
+            }), dn.utils.cleanTimeDisplay(i.st)]
+        }), d ? m(W8, {
+            className: K,
+            value: i.text || &quot;&quot;,
+            maxLength: 1e4,
+            onChange: At =&gt; {
+                z({
+                    index: n,
+                    type: &quot;translate&quot;,
+                    text: At.target.value
+                })
+            },
+            onBlur: ne,
+            autoFocus: !0,
+            onFocus: At =&gt; At.currentTarget.setSelectionRange(h.current, h.current)
+        }) : m(Wdt, {
+            disabled: N &gt;= 1,
+            isDeleted: t == null ? void 0 : t.delete,
+            isSelected: x,
+            onSelect: oe,
+            onCopy: ue,
+            onDelete: Z,
+            onRecover: ie,
+            speakerData: I,
+            spk: t == null ? void 0 : t.spk,
+            asChild: !0,
+            children: m(&quot;div&quot;, {
+                &quot;data-index&quot;: n,
+                className: On(He(i.delete)),
+                onClick: At =&gt; Y(At, i, &quot;translate&quot;),
+                style: {
+                    whiteSpace: &quot;pre-wrap&quot;
+                },
+                children: fe(i, i.text || &quot;​&quot;)
+            })
+        }), (t == null ? void 0 : t.text) &amp;&amp; m(&quot;div&quot;, {
+            className: &quot;absolute right-2 top-1 hidden items-center group-hover:flex&quot;,
+            children: m(rgi, {
+                onTranslateSuccess: At =&gt; {
+                    z({
+                        index: n,
+                        type: &quot;translate&quot;,
+                        text: At,
+                        extraData: {
+                            tr: 2
+                        }
+                    })
+                },
+                text: t.text
+            })
+        })]
+    })]
+})
+}
+const K$ = gn(&quot;historyStore&quot;)(pn(sgi));
+
+function ogi(n) {
+    var a, l, c, u;
+    const {
+        searchText: e,
+        showSearch: t
+    } = n.historyStore, i = n.data.text, r = _.useRef(null), s = d =&gt; {
+        Yt.emit(qt.PlayerSeekTo, d)
+    }, o = d =&gt; {
+        s(d)
+    };
+    return n.data ? m(&quot;span&quot;, {
+        ref: r,
+        className: On([&quot;hover:bg-muted&quot;, n.active &amp;&amp; &quot;active&quot;]),
+        children: m(&quot;span&quot;, {
+            className: On([n.data.delete &amp;&amp; &quot;deleted&quot;]),
+            onClick: () =&gt; o(n.data),
+            children: t &amp;&amp; e &amp;&amp; e !== &quot;&quot; ? m(Nae, {
+                tagName: &quot;span&quot;,
+                keywords: e,
+                useRegex: (a = n.historyStore) == null ? void 0 : a.useRegex,
+                active: ((c = n.historyStore) == null ? void 0 : c.allSearchIndex[(l = n.historyStore) == null ? void 0 : l.currentSearchIndex]) === n.index,
+                currentMatchIndex: (u = n.historyStore) == null ? void 0 : u.currentMatchIndex,
+                lineIndex: n.index,
+                children: i
+            }) : i
+        })
+    }) : null
+}
+gn(&quot;historyStore&quot;)(pn</code></pre>
+</section>
+
+<p>配套复刻页：<a href="../memo-transcription-panel.html">memo-transcription-panel.html</a></p>
